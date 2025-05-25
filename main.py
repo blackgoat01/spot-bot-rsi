@@ -14,8 +14,8 @@ def send_telegram_message(message):
     except Exception as e:
         print("Fehler beim Senden an Telegram:", e)
 
-# Testmeldung beim Start
-send_telegram_message("✅ Der Spot-Bot wurde erfolgreich gestartet und ist live!")
+# ✅ Testmeldung beim Start der Datei
+send_telegram_message("✅ Der GridSignal Bot wurde auf Render erfolgreich gestartet.")
 
 # Bybit API-Zugriff
 session = HTTP(
@@ -46,6 +46,7 @@ def get_rsi(symbol):
 
 def run():
     symbols = ["ADAUSDT", "DOGEUSDT", "XRPUSDT", "TRXUSDT"]
+    send_telegram_message("📡 RSI-Überwachung wurde gestartet und läuft jetzt live.")
     while True:
         for symbol in symbols:
             rsi = get_rsi(symbol)
@@ -54,5 +55,4 @@ def run():
         sleep(600)
 
 if __name__ == "__main__":
-    send_telegram_message("[GridSignal] RSI-Monitoring läuft jetzt.")
     run()
