@@ -1,6 +1,6 @@
 import os
 import requests
-from pybit.unified_trading import HTTP
+from pybit import HTTP
 from time import sleep
 
 # API-Zugriff
