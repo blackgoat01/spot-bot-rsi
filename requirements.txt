@@ -1,2 +1,0 @@
-requests
-pybit==4.2.4
