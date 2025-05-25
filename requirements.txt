@@ -1,2 +1,2 @@
 requests
-pybit==3.3.0
+pybit==4.2.4
