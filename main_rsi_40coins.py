@@ -3,30 +3,28 @@ import requests
 from pybit import HTTP
 from time import sleep
 
+# Telegram Nachricht senden
 def send_telegram_message(message):
     token = os.getenv("TELEGRAM_BOT_TOKEN")
     chat_id = os.getenv("TELEGRAM_CHAT_ID")
     url = f"https://api.telegram.org/bot{token}/sendMessage"
-    data = { "chat_id": chat_id, "text": message }
+    data = {"chat_id": chat_id, "text": message}
     try:
         requests.post(url, data=data)
     except Exception as e:
         print("Fehler beim Senden an Telegram:", e)
 
+# Startmeldung
 send_telegram_message("✅ Der GridSignal Bot wurde auf Render erfolgreich gestartet.")
+send_telegram_message("📡 RSI-Überwachung für 40 Coins wurde gestartet.")
 
+# Bybit Session
 session = HTTP(
     api_key=os.getenv("API_KEY"),
     api_secret=os.getenv("API_SECRET"),
 )
 
-symbols = [
-    "BTCUSDT", "ETHUSDT", "SOLUSDT", "BNBUSDT", "ADAUSDT", "XRPUSDT", "DOGEUSDT", "TRXUSDT", "DOTUSDT", "AVAXUSDT",
-    "MATICUSDT", "SHIBUSDT", "ATOMUSDT", "LINKUSDT", "APTUSDT", "NEARUSDT", "ARBUSDT", "FILUSDT", "SUIUSDT", "OPUSDT",
-    "STXUSDT", "INJUSDT", "RUNEUSDT", "LDOUSDT", "IMXUSDT", "PEPEUSDT", "FLOKIUSDT", "NOTUSDT", "PYTHUSDT", "RNDRUSDT",
-    "JASMYUSDT", "BONKUSDT", "WLDUSDT", "SEIUSDT", "GALAUSDT", "CHZUSDT", "ENJUSDT", "DYDXUSDT", "APEUSDT", "TIAUSDT"
-]
-
+# RSI Berechnung
 def get_rsi(symbol):
     try:
         kline = session.get_kline(
@@ -36,7 +34,7 @@ def get_rsi(symbol):
             limit=100
         )["result"]["list"]
         closes = [float(c[4]) for c in kline]
-        deltas = [closes[i+1] - closes[i] for i in range(len(closes)-1)]
+        deltas = [closes[i + 1] - closes[i] for i in range(len(closes) - 1)]
         gains = [d for d in deltas if d > 0]
         losses = [-d for d in deltas if d < 0]
         avg_gain = sum(gains) / 14 if gains else 0.01
@@ -45,17 +43,28 @@ def get_rsi(symbol):
         rsi = 100 - (100 / (1 + rs))
         return round(rsi, 2)
     except Exception as e:
-        print(f"Fehler beim RSI für {symbol}:", e)
+        print(f"Fehler bei RSI für {symbol}: {e}")
         return None
 
+# Überwachung starten
 def run():
-    send_telegram_message("📡 RSI-Überwachung für 40 Coins wurde gestartet.")
+    symbols = [
+        "ADAUSDT", "XRPUSDT", "DOGEUSDT", "TRXUSDT", "SOLUSDT", "AVAXUSDT", "SHIBUSDT", "DOTUSDT", "MATICUSDT",
+        "LINKUSDT", "LTCUSDT", "BNBUSDT", "FILUSDT", "APTUSDT", "INJUSDT", "ARBUSDT", "PEPEUSDT", "PYTHUSDT",
+        "FLOKIUSDT", "WIFUSDT", "TONUSDT", "RNDRUSDT", "TIAUSDT", "NEARUSDT", "OPUSDT", "JUPUSDT", "SUIUSDT",
+        "SEIUSDT", "NOTUSDT", "DEGENUSDT", "ETHUSDT", "BTCUSDT", "STRKUSDT", "TURBOUSDT", "JASMYUSDT", "1000SATSUSDT",
+        "BONKUSDT", "ARKMUSDT", "DYDXUSDT", "UNFIUSDT"
+    ]
+
     while True:
         for symbol in symbols:
             rsi = get_rsi(symbol)
-            if rsi and rsi < 40:
-                send_telegram_message(f"[GridSignal] RSI für {symbol} = {rsi} — mögliches Kaufsignal!")
-        sleep(600)
+            if rsi:
+                if rsi < 40:
+                    send_telegram_message(f"🟢 [GridSignal] RSI für {symbol} = {rsi} — mögliches **Kaufsignal**!")
+                elif rsi > 70:
+                    send_telegram_message(f"🔴 [GridSignal] RSI für {symbol} = {rsi} — mögliches **Verkaufssignal**!")
+        sleep(600)  # 10 Minuten Pause
 
 if __name__ == "__main__":
     run()
