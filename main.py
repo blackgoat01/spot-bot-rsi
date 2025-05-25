@@ -3,6 +3,21 @@ import requests
 from pybit import HTTP
 from time import sleep
 
+import requests
+
+# Telegram Testnachricht
+BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
+CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
+
+test_message = "TEST: Der Spot-Bot wurde erfolgreich gestartet und ist live."
+
+if BOT_TOKEN and CHAT_ID:
+    requests.post(
+        f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage",
+        data={"chat_id": CHAT_ID, "text": test_message}
+    )
+
+
 # API-Zugriff
 session = HTTP(
     api_key=os.getenv("API_KEY"),
